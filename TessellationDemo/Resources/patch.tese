@@ -4,7 +4,7 @@ layout(quads, fractional_odd_spacing, ccw) in;
 
 uniform mat4 mvp;
 
-out vec3 pos;
+out vec3 position;
 out vec3 tangent;
 out vec3 bitangent;
 out vec3 normal;

@@ -10,11 +10,13 @@ in vec3 bitangent;
 in vec3 normal;
 
 void main() {
+    vec3 n = normalize(normal);
+    
     vec3 lightDir = normalize(lightPos - position);
-    float diff = max(dot(normal, lightDir), 0.0);
+    float diff = max(dot(n, lightDir), 0.0);
     
     vec3 viewDir = normalize(cameraPos - position);
-    vec3 reflectDir = reflect(-lightDir, normal);
+    vec3 reflectDir = reflect(-lightDir, n);
     float spec = 0.5 * pow(max(dot(viewDir, reflectDir), 0.0), 32);
 
     FragColor = vec4(min(vec3(0.45, 0.65, 0.15) * diff + vec3(1, 1, 1) * spec, 1), 1);
