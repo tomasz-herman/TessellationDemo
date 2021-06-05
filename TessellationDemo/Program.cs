@@ -56,6 +56,9 @@ namespace TessellationDemo
             shader.Dispose();
             triangle.Dispose();
             quad.Dispose();
+            diffuse.Dispose();
+            normals.Dispose();
+            height.Dispose();
         }
 
         protected override void OnResize(ResizeEventArgs e)
