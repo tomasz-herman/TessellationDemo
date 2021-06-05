@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -16,6 +17,9 @@ namespace TessellationDemo
         private Texture normals;
         private Camera camera;
         private BezierPatch patch;
+
+        private bool showMesh = false;
+        private bool edgesOnly = false;
         
         public static void Main(string[] args)
         {
@@ -43,8 +47,9 @@ namespace TessellationDemo
             patch = BezierPatch.Example();
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.Disable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Lequal);
         }
 
         protected override void OnUnload()
@@ -76,6 +81,8 @@ namespace TessellationDemo
             camera.HandleInput(keyboard, mouse, (float)args.Time);
 
             if (keyboard.IsKeyDown(Keys.Escape)) Close();
+            if (keyboard.IsKeyPressed(Keys.R)) showMesh = !showMesh;
+            if (keyboard.IsKeyPressed(Keys.F)) edgesOnly = !edgesOnly;
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -83,16 +90,20 @@ namespace TessellationDemo
             base.OnRenderFrame(args);
             
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.PolygonMode(MaterialFace.FrontAndBack, edgesOnly ? PolygonMode.Line : PolygonMode.Fill);
 
             bezierShader.Use();
             bezierShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
             GL.PatchParameter(PatchParameterInt.PatchVertices, 16);
             patch.Patch.Render();
 
-            defaultShader.Use();
-            defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-            patch.Mesh.Render();
-            
+            if (showMesh)
+            {
+                defaultShader.Use();
+                defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+                patch.Mesh.Render();    
+            }
+
             Context.SwapBuffers();
         }
     }
