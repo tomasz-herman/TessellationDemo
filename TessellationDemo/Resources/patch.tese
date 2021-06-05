@@ -4,6 +4,7 @@ layout(quads, equal_spacing, ccw) in;
 
 uniform mat4 mvp;
 
+out vec3 position;
 out vec3 tangent;
 out vec3 bitangent;
 out vec3 normal;
@@ -45,11 +46,13 @@ void main() {
     float dbv2 =  3. * v *      (2.-3.*v);
     float dbv3 =  3. * v *      v;
 
-    gl_Position = mvp *
+    position = 
         ( bu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
         + bu1 * ( bv0*p10 + bv1*p11 + bv2*p12 + bv3*p13 )
         + bu2 * ( bv0*p20 + bv1*p21 + bv2*p22 + bv3*p23 )
-        + bu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 ));
+        + bu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz;
+
+    gl_Position = mvp * vec4(position, 1.0f);
 
     tangent = normalize
         ((dbu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
@@ -58,10 +61,10 @@ void main() {
         + dbu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz);
 
     bitangent = normalize
-        ((bu0 * ( dbv0*p00 + dbv1*p01 + dbv2*p02 + dbv3*p03 )
-        + bu1 * ( dbv0*p10 + dbv1*p11 + dbv2*p12 + dbv3*p13 )
-        + bu2 * ( dbv0*p20 + dbv1*p21 + dbv2*p22 + dbv3*p23 )
-        + bu3 * ( dbv0*p30 + dbv1*p31 + dbv2*p32 + dbv3*p33 )).xyz);
+        ((dbv0 * ( bu0*p00 + bu1*p10 + bu2*p20 + bu3*p30 )
+        + dbv1 * ( bu0*p01 + bu1*p11 + bu2*p21 + bu3*p31 )
+        + dbv2 * ( bu0*p02 + bu1*p12 + bu2*p22 + bu3*p32 )
+        + dbv3 * ( bu0*p03 + bu1*p13 + bu2*p23 + bu3*p33 )).xyz);
     
     normal = normalize(cross(tangent, bitangent));
 }

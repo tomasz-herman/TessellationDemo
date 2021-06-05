@@ -17,6 +17,7 @@ namespace TessellationDemo
         private Texture normals;
         private Camera camera;
         private BezierPatch patch;
+        private Vector3 light;
 
         private bool showMesh = false;
         private bool edgesOnly = false;
@@ -45,6 +46,7 @@ namespace TessellationDemo
             normals = new Texture("normals.png");
             camera = new PerspectiveCamera();
             patch = BezierPatch.Example();
+            light = new Vector3(0, 5, 0);
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
             GL.Disable(EnableCap.CullFace);
@@ -93,6 +95,8 @@ namespace TessellationDemo
             GL.PolygonMode(MaterialFace.FrontAndBack, edgesOnly ? PolygonMode.Line : PolygonMode.Fill);
 
             bezierShader.Use();
+            bezierShader.LoadFloat3("cameraPos", camera.Position);
+            bezierShader.LoadFloat3("lightPos", light);
             bezierShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
             GL.PatchParameter(PatchParameterInt.PatchVertices, 16);
             patch.Patch.Render();
