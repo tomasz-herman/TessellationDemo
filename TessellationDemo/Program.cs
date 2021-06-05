@@ -12,8 +12,6 @@ namespace TessellationDemo
     public class Program : GameWindow
     {
         private Shader shader;
-        private Mesh triangle;
-        private Mesh quad;
         private Texture diffuse;
         private Texture height;
         private Texture normals;
@@ -30,28 +28,21 @@ namespace TessellationDemo
             }
         }
 
-        public Program(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings)
-        {
-            
-        }
+        public Program(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
 
         protected override void OnLoad()
         {
             base.OnLoad();
 
             shader = new Shader(("shader.vert", ShaderType.VertexShader), ("shader.frag", ShaderType.FragmentShader));
-            triangle = new Mesh(new[] { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f,  0.5f, 0.0f}, 
-                new int[] { 0, 1, 2 }, PrimitiveType.Triangles);
-            quad = new Mesh(new[] { -0.4f, 0.5f, 0.0f, -0.4f, -0.4f, 0.0f, 0.4f, -0.4f, 0.0f, 0.4f, 0.5f, 0.0f}, 
-                new int[] { 0, 1, 2, 0, 2, 3 }, PrimitiveType.Triangles);
             diffuse = new Texture("diffuse.png");
             height = new Texture("height.png");
             normals = new Texture("normals.png");
-            camera = new OrbitingCamera();
+            camera = new PerspectiveCamera();
             patch = BezierPatch.Example();
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.Disable(EnableCap.CullFace);
         }
 
@@ -60,8 +51,6 @@ namespace TessellationDemo
             base.OnUnload();
             
             shader.Dispose();
-            triangle.Dispose();
-            quad.Dispose();
             diffuse.Dispose();
             normals.Dispose();
             height.Dispose();
@@ -94,8 +83,8 @@ namespace TessellationDemo
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             
             shader.Use();
-            triangle.Render();
-            quad.Render();
+            shader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+            patch.Mesh.Render();
 
             Context.SwapBuffers();
         }
