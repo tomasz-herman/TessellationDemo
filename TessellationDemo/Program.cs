@@ -4,14 +4,13 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using PrimitiveType = OpenTK.Graphics.OpenGL4.PrimitiveType;
 using ShaderType = OpenTK.Graphics.OpenGL4.ShaderType;
 
 namespace TessellationDemo
 {
     public class Program : GameWindow
     {
-        private Shader shader;
+        private Shader defaultShader, bezierShader;
         private Texture diffuse;
         private Texture height;
         private Texture normals;
@@ -34,7 +33,9 @@ namespace TessellationDemo
         {
             base.OnLoad();
 
-            shader = new Shader(("shader.vert", ShaderType.VertexShader), ("shader.frag", ShaderType.FragmentShader));
+            defaultShader = new Shader(("shader.vert", ShaderType.VertexShader), ("shader.frag", ShaderType.FragmentShader));
+            bezierShader = new Shader(("patch.vert", ShaderType.VertexShader), ("patch.frag", ShaderType.FragmentShader), 
+                ("patch.tesc", ShaderType.TessControlShader), ("patch.tese", ShaderType.TessEvaluationShader));
             diffuse = new Texture("diffuse.png");
             height = new Texture("height.png");
             normals = new Texture("normals.png");
@@ -42,7 +43,7 @@ namespace TessellationDemo
             patch = BezierPatch.Example();
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
-            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.Disable(EnableCap.CullFace);
         }
 
@@ -50,7 +51,8 @@ namespace TessellationDemo
         {
             base.OnUnload();
             
-            shader.Dispose();
+            defaultShader.Dispose();
+            bezierShader.Dispose();
             diffuse.Dispose();
             normals.Dispose();
             height.Dispose();
@@ -81,11 +83,16 @@ namespace TessellationDemo
             base.OnRenderFrame(args);
             
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            
-            shader.Use();
-            shader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-            patch.Mesh.Render();
 
+            bezierShader.Use();
+            bezierShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+            GL.PatchParameter(PatchParameterInt.PatchVertices, 16);
+            patch.Patch.Render();
+
+            defaultShader.Use();
+            defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+            patch.Mesh.Render();
+            
             Context.SwapBuffers();
         }
     }
