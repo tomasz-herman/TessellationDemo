@@ -71,6 +71,7 @@ namespace TessellationDemo
         public void Dispose()
         {
             GL.DeleteTexture(_handle);
+            GC.SuppressFinalize(this);
         }
     }
 }

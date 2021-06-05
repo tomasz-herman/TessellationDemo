@@ -18,6 +18,7 @@ namespace TessellationDemo
         private Texture height;
         private Texture normals;
         private Camera camera;
+        private BezierPatch patch;
         
         public static void Main(string[] args)
         {
@@ -47,6 +48,7 @@ namespace TessellationDemo
             height = new Texture("height.png");
             normals = new Texture("normals.png");
             camera = new OrbitingCamera();
+            patch = BezierPatch.Example();
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -63,6 +65,7 @@ namespace TessellationDemo
             diffuse.Dispose();
             normals.Dispose();
             height.Dispose();
+            patch.Dispose();
         }
 
         protected override void OnResize(ResizeEventArgs e)

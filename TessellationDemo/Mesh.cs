@@ -59,6 +59,7 @@ namespace TessellationDemo
                 GL.DeleteBuffer(vbo);
             }
             Vbos.Clear();
+            GC.SuppressFinalize(this);
         }
     }
 }
