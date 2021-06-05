@@ -14,6 +14,9 @@ namespace TessellationDemo
         private Shader shader;
         private Mesh triangle;
         private Mesh quad;
+        private Texture diffuse;
+        private Texture height;
+        private Texture normals;
         
         public static void Main(string[] args)
         {
@@ -35,11 +38,14 @@ namespace TessellationDemo
             base.OnLoad();
 
             shader = new Shader(("shader.vert", ShaderType.VertexShader), ("shader.frag", ShaderType.FragmentShader));
-            triangle = new Mesh(new float[] { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f,  0.5f, 0.0f}, 
+            triangle = new Mesh(new[] { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f,  0.5f, 0.0f}, 
                 new int[] { 0, 1, 2 }, PrimitiveType.Triangles);
-            quad = new Mesh(new float[] { -0.4f, 0.5f, 0.0f, -0.4f, -0.4f, 0.0f, 0.4f, -0.4f, 0.0f, 0.4f, 0.5f, 0.0f}, 
+            quad = new Mesh(new[] { -0.4f, 0.5f, 0.0f, -0.4f, -0.4f, 0.0f, 0.4f, -0.4f, 0.0f, 0.4f, 0.5f, 0.0f}, 
                 new int[] { 0, 1, 2, 0, 2, 3 }, PrimitiveType.Triangles);
-            
+            diffuse = new Texture("diffuse.png");
+            height = new Texture("height.png");
+            normals = new Texture("normals.png");
+
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
         }
 
