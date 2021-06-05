@@ -17,6 +17,7 @@ namespace TessellationDemo
         private Texture diffuse;
         private Texture height;
         private Texture normals;
+        private Camera camera;
         
         public static void Main(string[] args)
         {
@@ -45,8 +46,11 @@ namespace TessellationDemo
             diffuse = new Texture("diffuse.png");
             height = new Texture("height.png");
             normals = new Texture("normals.png");
+            camera = new OrbitingCamera();
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.Disable(EnableCap.CullFace);
         }
 
         protected override void OnUnload()
@@ -64,7 +68,7 @@ namespace TessellationDemo
         protected override void OnResize(ResizeEventArgs e)
         {
             base.OnResize(e);
-            
+            camera.Aspect = (float) Size.X / Size.Y;
             GL.Viewport(0, 0, Size.X, Size.Y);
         }
 
@@ -72,12 +76,12 @@ namespace TessellationDemo
         {
             base.OnUpdateFrame(args);
 
-            KeyboardState input = KeyboardState.GetSnapshot();
+            KeyboardState keyboard = KeyboardState.GetSnapshot();
+            MouseState mouse = MouseState.GetSnapshot();
+            
+            camera.HandleInput(keyboard, mouse, (float)args.Time);
 
-            if (input.IsKeyDown(Keys.Escape))
-            {
-                Close();
-            }
+            if (keyboard.IsKeyDown(Keys.Escape)) Close();
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
