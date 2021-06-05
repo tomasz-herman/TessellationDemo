@@ -48,6 +48,8 @@ namespace TessellationDemo
             base.OnUnload();
             
             shader.Dispose();
+            triangle.Dispose();
+            quad.Dispose();
         }
 
         protected override void OnResize(ResizeEventArgs e)
