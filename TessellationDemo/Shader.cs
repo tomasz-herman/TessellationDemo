@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Mathematics;
 
 namespace TessellationDemo
 {
@@ -83,6 +84,36 @@ namespace TessellationDemo
         public void Use()
         {
             GL.UseProgram(_handle);
+        }
+
+        public void LoadInteger(string name, int value)
+        {
+            int location = GL.GetUniformLocation(_handle, name);
+            GL.Uniform1(location, value);
+        }
+        
+        public void LoadFloat(string name, float value)
+        {
+            int location = GL.GetUniformLocation(_handle, name);
+            GL.Uniform1(location, value);
+        }
+        
+        public void LoadFloat3(string name, Vector3 value)
+        {
+            int location = GL.GetUniformLocation(_handle, name);
+            GL.Uniform3(location, ref value);
+        }
+                
+        public void LoadFloat4(string name, Vector4 value)
+        {
+            int location = GL.GetUniformLocation(_handle, name);
+            GL.Uniform4(location, ref value);
+        }
+        
+        public void LoadMatrix4(string name, Matrix4 value)
+        {
+            int location = GL.GetUniformLocation(_handle, name);
+            GL.UniformMatrix4(location, false, ref value);
         }
 
         public void Dispose()
