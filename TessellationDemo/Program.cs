@@ -113,10 +113,12 @@ namespace TessellationDemo
 
             if (showMesh)
             {
+                GL.LineWidth(2);
                 defaultShader.Use();
                 defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
                 if(showFlatPatch) flatPatch.Mesh.Render();
                 else bumpyPatch.Mesh.Render();
+                GL.LineWidth(1);
             }
 
             Context.SwapBuffers();
