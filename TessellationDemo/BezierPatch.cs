@@ -13,26 +13,27 @@ namespace TessellationDemo
         public Mesh Patch { get; private set; }
         public Mesh Mesh { get; private set; }
 
-        public static BezierPatch Example()
+        public static BezierPatch Create(Func<int, int, float> heights = null)
         {
+            heights ??= (i, j) => 0;
+            
             BezierPatch patch = new BezierPatch();
 
-            patch._surface = new Vector3[,]
+            patch._surface = new Vector3[13, 13];
+
+            for (int i = 0; i < 13; i++)
             {
-                {new(-3, 0, -3), new(-2, 0, -3), new(-1, 0, -3), new(0, 0, -3), new(1, 1, -3), new(2, 2, -3), new(3, 3, -3)},
-                {new(-3, 0, -2), new(-2, -2, -2), new(-1, -2, -2), new(0, 0, -2), new(1, 1, -2), new(2, 2, -2), new(3, 3, -2)},
-                {new(-3, 0, -1), new(-2, -2, -1), new(-1, -2, -1), new(0, 0, -1), new(1, 1, -1), new(2, 2, -1), new(3, 3, -1)},
-                {new(-3, 0, 0), new(-2, 0, 0), new(-1, 0, 0), new(0, 0, 0), new(1, 1, 0), new(2, 2, 0), new(3, 3, 0)},
-                {new(-3, 0, 1), new(-2, 0, 1), new(-1, 0, 1), new(0, 0, 1), new(1, 4, 1), new(2, 4, 1), new(3, 4, 1)},
-                {new(-3, 0, 2), new(-2, 0, 2), new(-1, 0, 2), new(0, 0, 2), new(1, 0, 2), new(2, 0, 2), new(3, 0, 2)},
-                {new(-3, 0, 3), new(-2, 0, 3), new(-1, 0, 3), new(0, 0, 3), new(1, 1, 3), new(2, 3, 3), new(3, 0, 3)}
-            };
+                for (int j = 0; j < 13; j++)
+                {
+                    patch._surface[j, i] = new Vector3(i - 6, heights(j, i), j - 6);
+                }
+            }
 
             patch._points = new List<Vector3>();
 
-            for (int i = 0; i < 6; i += 3)
+            for (int i = 0; i < 12; i += 3)
             {
-                for (int j = 0; j < 6; j += 3)
+                for (int j = 0; j < 12; j += 3)
                 {
                     patch._points.AddRange(
                         new[]

@@ -3,11 +3,21 @@
 layout(quads, fractional_odd_spacing, ccw) in;
 
 uniform mat4 mvp;
+uniform vec3 cameraPos;
+
+uniform sampler2D heightTex;
 
 out vec3 position;
 out vec3 tangent;
 out vec3 bitangent;
 out vec3 normal;
+out vec2 uv;
+
+float mipLevel(vec3 v) {
+    float dist = distance(v, cameraPos);
+    float factor = -16 * log(dist * 0.01) / log(10);
+    return 6 - log(factor);
+}
 
 void main() {
     vec4 p00 = gl_in[ 0].gl_Position;
@@ -46,25 +56,30 @@ void main() {
     float dbv2 =  3. * v *      (2.-3.*v);
     float dbv3 =  3. * v *      v;
 
-    position = 
-        ( bu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
-        + bu1 * ( bv0*p10 + bv1*p11 + bv2*p12 + bv3*p13 )
-        + bu2 * ( bv0*p20 + bv1*p21 + bv2*p22 + bv3*p23 )
-        + bu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz;
 
-    gl_Position = mvp * vec4(position, 1.0f);
+    position =
+    ( bu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
+    + bu1 * ( bv0*p10 + bv1*p11 + bv2*p12 + bv3*p13 )
+    + bu2 * ( bv0*p20 + bv1*p21 + bv2*p22 + bv3*p23 )
+    + bu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz;
+    
+    uv = position.xz / 12 + 0.5;
+    float height = textureLod(heightTex, uv, mipLevel(position)).r * 0.2;
 
     tangent = normalize
-        ((dbu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
-        + dbu1 * ( bv0*p10 + bv1*p11 + bv2*p12 + bv3*p13 )
-        + dbu2 * ( bv0*p20 + bv1*p21 + bv2*p22 + bv3*p23 )
-        + dbu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz);
+    ((dbu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
+    + dbu1 * ( bv0*p10 + bv1*p11 + bv2*p12 + bv3*p13 )
+    + dbu2 * ( bv0*p20 + bv1*p21 + bv2*p22 + bv3*p23 )
+    + dbu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz);
 
     bitangent = normalize
-        ((dbv0 * ( bu0*p00 + bu1*p10 + bu2*p20 + bu3*p30 )
-        + dbv1 * ( bu0*p01 + bu1*p11 + bu2*p21 + bu3*p31 )
-        + dbv2 * ( bu0*p02 + bu1*p12 + bu2*p22 + bu3*p32 )
-        + dbv3 * ( bu0*p03 + bu1*p13 + bu2*p23 + bu3*p33 )).xyz);
-    
+    ((dbv0 * ( bu0*p00 + bu1*p10 + bu2*p20 + bu3*p30 )
+    + dbv1 * ( bu0*p01 + bu1*p11 + bu2*p21 + bu3*p31 )
+    + dbv2 * ( bu0*p02 + bu1*p12 + bu2*p22 + bu3*p32 )
+    + dbv3 * ( bu0*p03 + bu1*p13 + bu2*p23 + bu3*p33 )).xyz);
+
     normal = normalize(cross(tangent, bitangent));
+
+    position += height * normal;
+    gl_Position = mvp * vec4(position, 1.0f);
 }
