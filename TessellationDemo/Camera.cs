@@ -21,6 +21,7 @@ namespace TessellationDemo
             set
             {
                 _pitch = value;
+                _pitch = MathHelper.Clamp(_pitch, -MathHelper.PiOver2 * 0.99f, MathHelper.PiOver2 * 0.99f);
                 UpdateVectors();
             }
         }
@@ -43,6 +44,7 @@ namespace TessellationDemo
         public void Rotate(float dpitch, float dyaw)
         {
             _pitch += dpitch;
+            _pitch = MathHelper.Clamp(_pitch, -MathHelper.PiOver2 * 0.99f, MathHelper.PiOver2 * 0.99f);
             _yaw += dyaw;
             UpdateVectors();
         }
