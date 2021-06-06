@@ -64,7 +64,8 @@ void main() {
     + bu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz;
     
     uv = position.xz / 12 + 0.5;
-    float height = textureLod(heightTex, uv, mipLevel(position)).r * 0.2;
+    float height = textureLod(heightTex, uv, mipLevel(position)).r * 0.75;
+    height *= height;
 
     tangent = normalize
     ((dbu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )

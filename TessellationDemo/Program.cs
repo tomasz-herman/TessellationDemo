@@ -46,7 +46,7 @@ namespace TessellationDemo
             normals = new Texture("normals.png");
             camera = new PerspectiveCamera();
             flatPatch = BezierPatch.Create();
-            bumpyPatch = BezierPatch.Create((i, j) => i % 3 == 0 ? 0 : (i / 3 % 2 == 0 ? 1 : -1));
+            bumpyPatch = BezierPatch.Create((i, j) => (i % 3 == 0 ? 0 : i / 3 % 2 == 0 ? 1 : -1) * (j % 3 == 0 ? 0 : j / 3 % 2 == 0 ? 1 : -1));
             light = new Vector3(0, 5, 0);
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
