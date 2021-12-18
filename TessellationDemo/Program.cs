@@ -1,4 +1,6 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using Dear_ImGui_Sample;
+using ImGuiNET;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -17,6 +19,7 @@ namespace TessellationDemo
         private BezierPatch flatPatch;
         private BezierPatch bumpyPatch;
         private Vector3 light;
+        private ImGuiController imguiController;
 
         private bool showMesh = false;
         private bool edgesOnly = false;
@@ -27,7 +30,7 @@ namespace TessellationDemo
             using (Program program = new Program(GameWindowSettings.Default, NativeWindowSettings.Default))
             {
                 program.Title = "Tesselation Demo";
-                program.Size = new Vector2i(800, 600);
+                program.Size = new Vector2i(1280, 720);
                 program.Run();
             }
         }
@@ -48,6 +51,7 @@ namespace TessellationDemo
             flatPatch = BezierPatch.Create();
             bumpyPatch = BezierPatch.Create((i, j) => (i % 3 == 0 ? 0 : i / 3 % 2 == 0 ? 1 : -1) * (j % 3 == 0 ? 0 : j / 3 % 2 == 0 ? 1 : -1));
             light = new Vector3(0, 5, 0);
+            imguiController = new ImGuiController(Size.X, Size.Y);
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
             GL.Disable(EnableCap.CullFace);
@@ -66,6 +70,7 @@ namespace TessellationDemo
             height.Dispose();
             flatPatch.Dispose();
             bumpyPatch.Dispose();
+            imguiController.Dispose();
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -73,11 +78,14 @@ namespace TessellationDemo
             base.OnResize(e);
             camera.Aspect = (float) Size.X / Size.Y;
             GL.Viewport(0, 0, Size.X, Size.Y);
+            imguiController.WindowResized(Size.X, Size.Y);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
+            
+            imguiController.Update(this, (float) args.Time);
 
             KeyboardState keyboard = KeyboardState.GetSnapshot();
             MouseState mouse = MouseState.GetSnapshot();
@@ -94,6 +102,10 @@ namespace TessellationDemo
         {
             base.OnRenderFrame(args);
             
+            GL.Disable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Lequal);
+
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.PolygonMode(MaterialFace.FrontAndBack, edgesOnly ? PolygonMode.Line : PolygonMode.Fill);
 
@@ -120,8 +132,19 @@ namespace TessellationDemo
                 else bumpyPatch.Mesh.Render();
                 GL.LineWidth(1);
             }
+            
+            RenderGui();
 
             Context.SwapBuffers();
+        }
+
+        private void RenderGui()
+        {
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            
+            ImGui.ShowDemoWindow();
+            
+            imguiController.Render();
         }
     }
 }
