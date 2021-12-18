@@ -6,6 +6,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using ShaderType = OpenTK.Graphics.OpenGL4.ShaderType;
+using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace TessellationDemo
 {
@@ -18,7 +19,7 @@ namespace TessellationDemo
         private Camera camera;
         private BezierPatch flatPatch;
         private BezierPatch bumpyPatch;
-        private Vector3 light;
+        private System.Numerics.Vector3 light;
         private ImGuiController imguiController;
 
         private bool showMesh = false;
@@ -50,7 +51,7 @@ namespace TessellationDemo
             camera = new PerspectiveCamera();
             flatPatch = BezierPatch.Create();
             bumpyPatch = BezierPatch.Create((i, j) => (i % 3 == 0 ? 0 : i / 3 % 2 == 0 ? 1 : -1) * (j % 3 == 0 ? 0 : j / 3 % 2 == 0 ? 1 : -1));
-            light = new Vector3(0, 5, 0);
+            light = new System.Numerics.Vector3(0, 5, 0);
             imguiController = new ImGuiController(Size.X, Size.Y);
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
@@ -87,6 +88,8 @@ namespace TessellationDemo
             
             imguiController.Update(this, (float) args.Time);
 
+            if(ImGui.GetIO().WantCaptureMouse) return;
+
             KeyboardState keyboard = KeyboardState.GetSnapshot();
             MouseState mouse = MouseState.GetSnapshot();
             
@@ -111,7 +114,7 @@ namespace TessellationDemo
 
             bezierShader.Use();
             bezierShader.LoadFloat3("cameraPos", camera.Position);
-            bezierShader.LoadFloat3("lightPos", light);
+            bezierShader.LoadFloat3("lightPos", new Vector3(light.X, light.Y, light.Z));
             height.Use(TextureUnit.Texture0);
             bezierShader.LoadInteger("heightTex", 0);
             diffuse.Use(TextureUnit.Texture1);
@@ -142,9 +145,28 @@ namespace TessellationDemo
         {
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             
-            ImGui.ShowDemoWindow();
+            ImGui.Begin("Options");
+            ImGui.Checkbox("Show Mesh", ref showMesh);
+            ImGui.Checkbox("Edges Only", ref edgesOnly);
+            ImGui.Checkbox("Flat Patch", ref showFlatPatch);
+            ImGui.DragFloat3("Light Position", ref light, 0.01f);
+            ImGui.End();
             
             imguiController.Render();
+        }
+
+        protected override void OnTextInput(TextInputEventArgs e)
+        {
+            base.OnTextInput(e);
+            
+            imguiController.PressChar((char)e.Unicode);
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            
+            imguiController.MouseScroll(e.Offset);
         }
     }
 }
