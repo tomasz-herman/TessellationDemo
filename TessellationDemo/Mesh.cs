@@ -15,13 +15,21 @@ namespace TessellationDemo
         {
             Type = type;
             Count = indices.Length;
-            Load(positions, indices);
+            Load(positions, null, indices);
         }
         
-        public void Load(float[] positions, int[] indices) {
+        public Mesh(float[] positions, float[] normals, int[] indices, PrimitiveType type)
+        {
+            Type = type;
+            Count = indices.Length;
+            Load(positions, normals, indices);
+        }
+        
+        public void Load(float[] positions, float[] normals, int[] indices) {
             Vao = GL.GenVertexArray();
             GL.BindVertexArray(Vao);
             LoadData(positions, 0, 3);
+            if(normals != null) LoadData(normals, 1, 3);
             LoadIndices(indices);
             GL.BindVertexArray(0);
         }

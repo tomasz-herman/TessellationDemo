@@ -7,6 +7,7 @@ namespace TessellationDemo;
 public class Jelly : IDisposable
 {
     public BezierCube Cube { get; }
+    public Mesh Teapot { get; }
 
     public Spring[] Springs { get; }
     public Spring[] ControlSprings { get; }
@@ -29,6 +30,7 @@ public class Jelly : IDisposable
         ControlFrame = new Frame(new Vector3(0), new Vector3(3));
         ConstraintFrame = new Frame(new Vector3(-Constraint), new Vector3(Constraint));
         (Springs, ControlSprings) = CreateSprings();
+        Teapot = ModelLoader.Load("teapot.obj");
     }
 
     public void Update(float deltaTime)
@@ -133,6 +135,7 @@ public class Jelly : IDisposable
     public void Dispose()
     {
         Cube?.Dispose();
+        Teapot?.Dispose();
         ControlFrame?.Dispose();
         ConstraintFrame?.Dispose();
         foreach (var spring in Springs)

@@ -12,7 +12,7 @@ namespace TessellationDemo
 {
     public class Program : GameWindow
     {
-        private Shader defaultShader, bezierShader;
+        private Shader defaultShader, bezierShader, deformationShader;
         private Texture diffuse;
         private Texture height;
         private Texture normals;
@@ -25,6 +25,7 @@ namespace TessellationDemo
         private bool showControlFrame = true;
         private bool showConstraintFrame = true;
         private bool showCube = true;
+        private bool showTeapot;
         private float distress = 1;
         
         public static void Main(string[] args)
@@ -44,11 +45,9 @@ namespace TessellationDemo
             base.OnLoad();
 
             defaultShader = new Shader(("shader.vert", ShaderType.VertexShader), ("shader.frag", ShaderType.FragmentShader));
+            deformationShader = new Shader(("deformed.vert", ShaderType.VertexShader), ("deformed.frag", ShaderType.FragmentShader));
             bezierShader = new Shader(("patch.vert", ShaderType.VertexShader), ("patch.frag", ShaderType.FragmentShader), 
                 ("patch.tesc", ShaderType.TessControlShader), ("patch.tese", ShaderType.TessEvaluationShader));
-            diffuse = new Texture("diffuse.png");
-            height = new Texture("height.png");
-            normals = new Texture("normals.png");
             camera = new PerspectiveCamera();
             jelly = new Jelly();
             light = new Vector3(0, 500, 0);
@@ -66,9 +65,7 @@ namespace TessellationDemo
             
             defaultShader.Dispose();
             bezierShader.Dispose();
-            diffuse.Dispose();
-            normals.Dispose();
-            height.Dispose();
+            deformationShader.Dispose();
             jelly.Dispose();
         }
 
@@ -137,6 +134,26 @@ namespace TessellationDemo
                    patch.Patch.Render();
                } 
             }
+            
+            if (showTeapot)
+            {
+                deformationShader.Use();
+                deformationShader.LoadFloat3("cameraPos", camera.Position);
+                deformationShader.LoadFloat3("lightPos", light);
+                deformationShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+                var points = jelly.Cube.Controls;
+                for (int i = 0; i < 4; i++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        for (int k = 0; k < 4; k++)
+                        {
+                            deformationShader.LoadFloat3($"p[{i}][{j}][{k}]", points[i, j, k].Get);
+                        }
+                    }
+                }
+                jelly.Teapot.Render();
+            }
 
             if (showSprings)
             {
@@ -187,6 +204,7 @@ namespace TessellationDemo
             ImGui.SliderFloat("Collision Elasticity", ref jelly.CollisionElasticity, 0, 1);
             ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
             ImGui.Checkbox("Show Cube", ref showCube);
+            ImGui.Checkbox("Show Teapot", ref showTeapot);
             ImGui.Checkbox("Show Springs", ref showSprings);
             ImGui.Checkbox("Show Control Frame", ref showControlFrame);
             ImGui.Checkbox("Show Constraint Frame", ref showConstraintFrame);
