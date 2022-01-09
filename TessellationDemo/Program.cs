@@ -22,13 +22,14 @@ namespace TessellationDemo
 
         private bool showSprings;
         private bool showCube = true;
+        private float distress = 1;
         
         public static void Main(string[] args)
         {
             using (Program program = new Program(GameWindowSettings.Default, NativeWindowSettings.Default))
             {
-                program.Title = "Tesselation Demo";
-                program.Size = new Vector2i(800, 600);
+                program.Title = "Jelly";
+                program.Size = new Vector2i(1280, 800);
                 program.Run();
             }
         }
@@ -47,7 +48,7 @@ namespace TessellationDemo
             normals = new Texture("normals.png");
             camera = new PerspectiveCamera();
             jelly = new Jelly();
-            light = new Vector3(0, 5, 0);
+            light = new Vector3(0, 500, 0);
             controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
@@ -137,10 +138,16 @@ namespace TessellationDemo
         private void RenderGui()
         {
             ImGui.Begin("Options");
+            ImGui.SliderFloat("Distress", ref distress, 0.01f, 1);
+            ImGui.SliderFloat("Mass", ref jelly.Mass, 0.01f, 100);
             ImGui.SliderFloat("Elasticity", ref jelly.Elasticity, 0.01f, 100);
             ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
             ImGui.Checkbox("Show Cube", ref showCube);
             ImGui.Checkbox("Show Springs", ref showSprings);
+            if (ImGui.Button("Stress"))
+            {
+                jelly.Stress(distress);
+            }
             ImGui.End();
             
             controller.Render();
