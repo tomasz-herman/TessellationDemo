@@ -22,7 +22,8 @@ namespace TessellationDemo
         private ImGuiController controller;
 
         private bool showSprings;
-        private bool showControlFrame;
+        private bool showControlFrame = true;
+        private bool showConstraintFrame = true;
         private bool showCube = true;
         private float distress = 1;
         
@@ -139,7 +140,7 @@ namespace TessellationDemo
 
             if (showSprings)
             {
-                GL.LineWidth(3);
+                GL.LineWidth(2);
                 defaultShader.Use();
                 defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
                 foreach (var spring in jelly.Springs)
@@ -162,6 +163,15 @@ namespace TessellationDemo
                 GL.LineWidth(1);
             }
             
+            if (showConstraintFrame)
+            {
+                GL.LineWidth(5);
+                defaultShader.Use();
+                defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+                jelly.ConstraintFrame.Mesh.Render();
+                GL.LineWidth(1);
+            }
+            
             RenderGui();
 
             Context.SwapBuffers();
@@ -174,10 +184,12 @@ namespace TessellationDemo
             ImGui.SliderFloat("Mass", ref jelly.Mass, 0.01f, 100);
             ImGui.SliderFloat("Elasticity", ref jelly.Elasticity, 0.01f, 100);
             ImGui.SliderFloat("Control Elasticity", ref jelly.ControlElasticity, 0.01f, 100);
+            ImGui.SliderFloat("Collision Elasticity", ref jelly.CollisionElasticity, 0, 1);
             ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
             ImGui.Checkbox("Show Cube", ref showCube);
             ImGui.Checkbox("Show Springs", ref showSprings);
             ImGui.Checkbox("Show Control Frame", ref showControlFrame);
+            ImGui.Checkbox("Show Constraint Frame", ref showConstraintFrame);
             if (ImGui.Button("Stress"))
             {
                 jelly.Stress(distress);

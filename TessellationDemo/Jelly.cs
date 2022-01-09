@@ -11,18 +11,23 @@ public class Jelly : IDisposable
     public Spring[] Springs { get; }
     public Spring[] ControlSprings { get; }
     public Frame ControlFrame { get; }
+    public Frame ConstraintFrame { get; }
 
     public Ptr<State>[,,] States { get; set; }
 
     public float ControlElasticity = 1.0f;
+    public float CollisionElasticity = 1.0f;
     public float Elasticity = 1.0f;
     public float Friction = 1.0f;
     public float Mass = 1.0f;
+    
+    public const float Constraint = 5;
 
     public Jelly()
     {
         Cube = new BezierCube();
         ControlFrame = new Frame(new Vector3(0), new Vector3(3));
+        ConstraintFrame = new Frame(new Vector3(-Constraint), new Vector3(Constraint));
         (Springs, ControlSprings) = CreateSprings();
     }
 
@@ -38,11 +43,79 @@ public class Jelly : IDisposable
             state.Get.Integrate(deltaTime, Mass);
             state.Get.Advance();
         }
+        
+        FixCollisions();
 
         Cube.Update();
         ControlFrame.Update();
         foreach (var spring in Springs) spring.Update();
         foreach (var spring in ControlSprings) spring.Update();
+    }
+
+    public void FixCollisions()
+    {
+        foreach (var ptr in States)
+        {
+            State state = ptr.Get;
+            Vector3 pos = state.Position.Get;
+            Vector3 vel = state.Velocity.Get;
+            bool collision = true;
+            while (collision)
+            {
+                collision = false;
+                switch (state.Position.Get.X)
+                {
+                    case < -Constraint:
+                        pos.X = -Constraint;
+                        vel.X = -vel.X * CollisionElasticity;
+                        state.Position.Get = pos;
+                        state.Velocity.Get = vel;
+                        collision = true;
+                        break;
+                    case > Constraint:
+                        pos.X = Constraint;
+                        vel.X = -vel.X * CollisionElasticity;
+                        state.Position.Get = pos;
+                        state.Velocity.Get = vel;
+                        collision = true;
+                        break;
+                }
+                switch (state.Position.Get.Y)
+                {
+                    case < -Constraint:
+                        pos.Y = -Constraint;
+                        vel.Y = -vel.Y * CollisionElasticity;
+                        state.Position.Get = pos;
+                        state.Velocity.Get = vel;
+                        collision = true;
+                        break;
+                    case > Constraint:
+                        pos.Y = Constraint;
+                        vel.Y = -vel.Y * CollisionElasticity;
+                        state.Position.Get = pos;
+                        state.Velocity.Get = vel;
+                        collision = true;
+                        break;
+                }
+                switch (state.Position.Get.Z)
+                {
+                    case < -Constraint:
+                        pos.Z = -Constraint;
+                        vel.Z = -vel.Z * CollisionElasticity;
+                        state.Position.Get = pos;
+                        state.Velocity.Get = vel;
+                        collision = true;
+                        break;
+                    case > Constraint:
+                        pos.Z = Constraint;
+                        vel.Z = -vel.Z * CollisionElasticity;
+                        state.Position.Get = pos;
+                        state.Velocity.Get = vel;
+                        collision = true;
+                        break;
+                }
+            }
+        }
     }
 
     public void Stress(float max)
@@ -61,6 +134,7 @@ public class Jelly : IDisposable
     {
         Cube?.Dispose();
         ControlFrame?.Dispose();
+        ConstraintFrame?.Dispose();
         foreach (var spring in Springs)
         {
             spring?.Dispose();
