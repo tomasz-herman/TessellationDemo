@@ -1,4 +1,5 @@
-﻿using Dear_ImGui_Sample;
+﻿using System;
+using Dear_ImGui_Sample;
 using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
@@ -92,8 +93,25 @@ namespace TessellationDemo
             MouseState mouse = MouseState.GetSnapshot();
             
             camera.HandleInput(keyboard, mouse, (float)args.Time);
+            if(mouse.IsButtonDown(MouseButton.Button2)) HandleFrameTranslation(mouse);
+            if(mouse.IsButtonDown(MouseButton.Button3)) HandleFrameRotation(mouse);
 
             if (keyboard.IsKeyDown(Keys.Escape)) Close();
+        }
+
+        private void HandleFrameTranslation(MouseState state)
+        {
+            var (dx, dy) = state.Delta * 0.01f;
+            jelly.ControlFrame.Translate(camera.Right * dx - camera.Up * dy);
+        }
+        
+        private void HandleFrameRotation(MouseState state)
+        {
+            Vector2 delta = state.Delta;
+            if(Math.Abs(delta.Length) < 1e-5) return;
+            float angle = delta.Length * 0.01f;
+            Vector3 axis = (-delta.X * camera.Up - delta.Y * camera.Right).Normalized();
+            jelly.ControlFrame.Rotate(axis, angle);
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)

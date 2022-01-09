@@ -37,6 +37,26 @@ public class Frame : IDisposable
         );
     }
 
+    public void Translate(Vector3 translation)
+    {
+        foreach (var control in Controls)
+        {
+            control.Get.Position.Get += translation;
+        }
+    }
+    
+    public void Rotate(Vector3 axis, float angle)
+    {
+        Vector3 center = (Controls[0, 0, 0].Get.Position.Get + Controls[1, 1, 1].Get.Position.Get) / 2;
+        Translate(-center);
+        Matrix3 rotation = Matrix3.CreateFromAxisAngle(axis, angle);
+        foreach (var control in Controls)
+        {
+            control.Get.Position.Get = rotation * control.Get.Position.Get;
+        }
+        Translate(center);
+    }
+
     public void Update()
     {
         Mesh.UpdateData(new[]
