@@ -7,92 +7,74 @@ namespace TessellationDemo
 {
     public class BezierPatch : IDisposable
     {
+        private Vector3[,] controls;
+        
         public Mesh Patch { get; private set; }
         public Mesh Mesh { get; private set; }
 
-        public static BezierPatch Create(Func<int, int, float> heights = null)
+        public BezierPatch(Vector3[,] controls)
         {
-            heights ??= (i, j) => 0;
-            
-            BezierPatch patch = new BezierPatch();
+            this.controls = controls;
 
-            Vector3[,] surface = new Vector3[13, 13];
-            
-            for (int i = 0; i < 13; i++)
-            {
-                for (int j = 0; j < 13; j++)
-                {
-                     surface[j, i] = new Vector3(i - 6, heights(j, i), j - 6);
-                }
-            }
-            
             List<int> patchIndices = new List<int>();
 
-            for (int i = 0; i < 12; i += 3)
-            {
-                for (int j = 0; j < 12; j += 3)
+            patchIndices.AddRange(
+                new[]
                 {
-                    patchIndices.AddRange(
-                        new[]
-                        {
-                            (j + 0) * 13 + (i + 0),
-                            (j + 1) * 13 + (i + 0),
-                            (j + 2) * 13 + (i + 0),
-                            (j + 3) * 13 + (i + 0),
+                    0 * 4 + 0,
+                    1 * 4 + 0,
+                    2 * 4 + 0,
+                    3 * 4 + 0,
 
-                            (j + 0) * 13 + (i + 1),
-                            (j + 1) * 13 + (i + 1),
-                            (j + 2) * 13 + (i + 1),
-                            (j + 3) * 13 + (i + 1),
-                            
-                            (j + 0) * 13 + (i + 2),
-                            (j + 1) * 13 + (i + 2),
-                            (j + 2) * 13 + (i + 2),
-                            (j + 3) * 13 + (i + 2),
-                            
-                            (j + 0) * 13 + (i + 3),
-                            (j + 1) * 13 + (i + 3),
-                            (j + 2) * 13 + (i + 3),
-                            (j + 3) * 13 + (i + 3)
-                        }
-                    );
+                    0 * 4 + 1,
+                    1 * 4 + 1,
+                    2 * 4 + 1,
+                    3 * 4 + 1,
+                    
+                    0 * 4 + 2,
+                    1 * 4 + 2,
+                    2 * 4 + 2,
+                    3 * 4 + 2,
+                    
+                    0 * 4 + 3,
+                    1 * 4 + 3,
+                    2 * 4 + 3,
+                    3 * 4 + 3
                 }
-            }
+            );
 
             List<float> positions = new List<float>();
             List<int> meshIndices = new List<int>();
-            for (int i = 0; i < surface.GetLength(0); i++)
-            for (int j = 0; j < surface.GetLength(1); j++)
+            for (int i = 0; i < controls.GetLength(0); i++)
+            for (int j = 0; j < controls.GetLength(1); j++)
             {
-                Vector3 pos = surface[i, j];
+                Vector3 pos = controls[i, j];
                 positions.AddRange(new[] {pos.X, pos.Y, pos.Z});
                 
-                int idx = j + i * surface.GetLength(1);
+                int idx = j + i * controls.GetLength(1);
 
-                if (j + 1 < surface.GetLength(1))
+                if (j + 1 < controls.GetLength(1))
                 {
                     meshIndices.AddRange(new[]{idx, idx + 1});
                 }
 
-                if (i + 1 < surface.GetLength(0))
+                if (i + 1 < controls.GetLength(0))
                 {
-                    meshIndices.AddRange(new[]{idx, idx + surface.GetLength(1)});
+                    meshIndices.AddRange(new[]{idx, idx + controls.GetLength(1)});
                 }
             }
             
-            patch.Mesh = new Mesh(
+            Mesh = new Mesh(
                 positions.ToArray(),
                 meshIndices.ToArray(),
                 PrimitiveType.Lines
             );
             
-            patch.Patch = new Mesh(
+            Patch = new Mesh(
                 positions.ToArray(), 
                 patchIndices.ToArray(), 
                 PrimitiveType.Patches
             );
-
-            return patch;
         }
 
         public void Dispose()

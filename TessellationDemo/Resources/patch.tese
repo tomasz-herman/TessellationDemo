@@ -5,19 +5,10 @@ layout(quads, fractional_odd_spacing, ccw) in;
 uniform mat4 mvp;
 uniform vec3 cameraPos;
 
-uniform sampler2D heightTex;
-
 out vec3 position;
 out vec3 tangent;
 out vec3 bitangent;
 out vec3 normal;
-out vec2 uv;
-
-float mipLevel(vec3 v) {
-    float dist = distance(v, cameraPos);
-    float factor = -16 * log(dist * 0.01) / log(10);
-    return 6 - log(factor);
-}
 
 void main() {
     vec4 p00 = gl_in[ 0].gl_Position;
@@ -56,16 +47,11 @@ void main() {
     float dbv2 =  3. * v *      (2.-3.*v);
     float dbv3 =  3. * v *      v;
 
-
     position =
     ( bu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
     + bu1 * ( bv0*p10 + bv1*p11 + bv2*p12 + bv3*p13 )
     + bu2 * ( bv0*p20 + bv1*p21 + bv2*p22 + bv3*p23 )
     + bu3 * ( bv0*p30 + bv1*p31 + bv2*p32 + bv3*p33 )).xyz;
-    
-    uv = position.xz / 12 + 0.5;
-    float height = textureLod(heightTex, uv, mipLevel(position)).r * 0.75;
-    height *= height;
 
     tangent = normalize
     ((dbu0 * ( bv0*p00 + bv1*p01 + bv2*p02 + bv3*p03 )
@@ -81,6 +67,5 @@ void main() {
 
     normal = normalize(cross(tangent, bitangent));
 
-    position += height * normal;
     gl_Position = mvp * vec4(position, 1.0f);
 }

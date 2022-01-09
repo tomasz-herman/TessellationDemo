@@ -1,4 +1,6 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using Dear_ImGui_Sample;
+using ImGuiNET;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -14,13 +16,11 @@ namespace TessellationDemo
         private Texture height;
         private Texture normals;
         private Camera camera;
-        private BezierPatch flatPatch;
-        private BezierPatch bumpyPatch;
+        private Jelly jelly;
         private Vector3 light;
+        private ImGuiController controller;
 
-        private bool showMesh = false;
-        private bool edgesOnly = false;
-        private bool showFlatPatch = false;
+        private bool edgesOnly;
         
         public static void Main(string[] args)
         {
@@ -45,9 +45,9 @@ namespace TessellationDemo
             height = new Texture("height.png");
             normals = new Texture("normals.png");
             camera = new PerspectiveCamera();
-            flatPatch = BezierPatch.Create();
-            bumpyPatch = BezierPatch.Create((i, j) => (i % 3 == 0 ? 0 : i / 3 % 2 == 0 ? 1 : -1) * (j % 3 == 0 ? 0 : j / 3 % 2 == 0 ? 1 : -1));
+            jelly = new Jelly();
             light = new Vector3(0, 5, 0);
+            controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
             GL.ClearColor(0.4f, 0.7f, 0.9f, 1.0f);
             GL.Disable(EnableCap.CullFace);
@@ -64,8 +64,7 @@ namespace TessellationDemo
             diffuse.Dispose();
             normals.Dispose();
             height.Dispose();
-            flatPatch.Dispose();
-            bumpyPatch.Dispose();
+            jelly.Dispose();
         }
 
         protected override void OnResize(ResizeEventArgs e)
@@ -73,11 +72,16 @@ namespace TessellationDemo
             base.OnResize(e);
             camera.Aspect = (float) Size.X / Size.Y;
             GL.Viewport(0, 0, Size.X, Size.Y);
+            controller.WindowResized(ClientSize.X, ClientSize.Y);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
             base.OnUpdateFrame(args);
+            
+            controller.Update(this, (float) args.Time);
+            
+            if(ImGui.GetIO().WantCaptureMouse) return;
 
             KeyboardState keyboard = KeyboardState.GetSnapshot();
             MouseState mouse = MouseState.GetSnapshot();
@@ -85,14 +89,16 @@ namespace TessellationDemo
             camera.HandleInput(keyboard, mouse, (float)args.Time);
 
             if (keyboard.IsKeyDown(Keys.Escape)) Close();
-            if (keyboard.IsKeyPressed(Keys.R)) showMesh = !showMesh;
             if (keyboard.IsKeyPressed(Keys.F)) edgesOnly = !edgesOnly;
-            if (keyboard.IsKeyPressed(Keys.T)) showFlatPatch = !showFlatPatch;
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
         {
             base.OnRenderFrame(args);
+            
+            GL.Disable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+            GL.DepthFunc(DepthFunction.Lequal);
             
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.PolygonMode(MaterialFace.FrontAndBack, edgesOnly ? PolygonMode.Line : PolygonMode.Fill);
@@ -100,28 +106,41 @@ namespace TessellationDemo
             bezierShader.Use();
             bezierShader.LoadFloat3("cameraPos", camera.Position);
             bezierShader.LoadFloat3("lightPos", light);
-            height.Use(TextureUnit.Texture0);
-            bezierShader.LoadInteger("heightTex", 0);
-            diffuse.Use(TextureUnit.Texture1);
-            bezierShader.LoadInteger("colorTex", 1);
-            normals.Use(TextureUnit.Texture2);
-            bezierShader.LoadInteger("normalTex", 2);
             bezierShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
             GL.PatchParameter(PatchParameterInt.PatchVertices, 16);
-            if(showFlatPatch) flatPatch.Patch.Render();
-            else bumpyPatch.Patch.Render();
-
-            if (showMesh)
+            foreach (var patch in jelly.Cube.Patches)
             {
-                GL.LineWidth(2);
-                defaultShader.Use();
-                defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-                if(showFlatPatch) flatPatch.Mesh.Render();
-                else bumpyPatch.Mesh.Render();
-                GL.LineWidth(1);
+                patch.Patch.Render();
             }
 
+            GL.LineWidth(2);
+            defaultShader.Use();
+            defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+            foreach (var patch in jelly.Cube.Patches)
+            {
+                patch.Mesh.Render();
+            }
+            GL.LineWidth(1);
+            
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            ImGui.ShowDemoWindow();
+            controller.Render();
+
             Context.SwapBuffers();
+        }
+
+        protected override void OnTextInput(TextInputEventArgs e)
+        {
+            base.OnTextInput(e);
+            
+            controller.PressChar((char)e.Unicode);
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            
+            controller.MouseScroll(e.Offset);
         }
     }
 }
