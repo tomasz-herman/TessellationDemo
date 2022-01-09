@@ -9,9 +9,12 @@ public class Jelly : IDisposable
     public BezierCube Cube { get; }
 
     public Spring[] Springs { get; }
+    public Spring[] ControlSprings { get; }
+    public Frame ControlFrame { get; }
 
     public Ptr<State>[,,] States { get; set; }
 
+    public float ControlElasticity = 1.0f;
     public float Elasticity = 1.0f;
     public float Friction = 1.0f;
     public float Mass = 1.0f;
@@ -19,15 +22,15 @@ public class Jelly : IDisposable
     public Jelly()
     {
         Cube = new BezierCube();
-        Springs = CreateSprings();
+        ControlFrame = new Frame(new Vector3(0), new Vector3(3));
+        (Springs, ControlSprings) = CreateSprings();
     }
 
     public void Update(float deltaTime)
     {
-        foreach (var spring in Springs)
-        {
-            spring.CalculateForces(Elasticity);
-        }
+        foreach (var spring in Springs) spring.CalculateForces(Elasticity);
+
+        foreach (var spring in ControlSprings) spring.CalculateForces(ControlElasticity);
 
         foreach (var state in States)
         {
@@ -37,10 +40,9 @@ public class Jelly : IDisposable
         }
 
         Cube.Update();
-        foreach (var spring in Springs)
-        {
-            spring.Update();
-        }
+        ControlFrame.Update();
+        foreach (var spring in Springs) spring.Update();
+        foreach (var spring in ControlSprings) spring.Update();
     }
 
     public void Stress(float max)
@@ -58,13 +60,18 @@ public class Jelly : IDisposable
     public void Dispose()
     {
         Cube?.Dispose();
+        ControlFrame?.Dispose();
         foreach (var spring in Springs)
+        {
+            spring?.Dispose();
+        }
+        foreach (var spring in ControlSprings)
         {
             spring?.Dispose();
         }
     }
 
-    private Spring[] CreateSprings()
+    private (Spring[], Spring[]) CreateSprings()
     {
         States = new Ptr<State>[4, 4, 4];
         for (int i = 0; i < 4; i++)
@@ -80,6 +87,7 @@ public class Jelly : IDisposable
         }
 
         List<Spring> springs = new List<Spring>();
+        List<Spring> controlSprings = new List<Spring>();
         float sqrt2 = (float) Math.Sqrt(2);
         for (int i = 0; i < 3; i++)
         {
@@ -123,8 +131,17 @@ public class Jelly : IDisposable
                 }
             }
         }
+        
+        controlSprings.Add(new Spring(ControlFrame.Controls[0, 0, 0], States[0, 0, 0], 0));
+        controlSprings.Add(new Spring(ControlFrame.Controls[0, 0, 1], States[0, 0, 3], 0));
+        controlSprings.Add(new Spring(ControlFrame.Controls[0, 1, 0], States[0, 3, 0], 0));
+        controlSprings.Add(new Spring(ControlFrame.Controls[0, 1, 1], States[0, 3, 3], 0));
+        controlSprings.Add(new Spring(ControlFrame.Controls[1, 0, 0], States[3, 0, 0], 0));
+        controlSprings.Add(new Spring(ControlFrame.Controls[1, 0, 1], States[3, 0, 3], 0));
+        controlSprings.Add(new Spring(ControlFrame.Controls[1, 1, 0], States[3, 3, 0], 0));
+        controlSprings.Add(new Spring(ControlFrame.Controls[1, 1, 1], States[3, 3, 3], 0));
 
-        return springs.ToArray();
+        return (springs.ToArray(), controlSprings.ToArray());
     }
 
     public struct State

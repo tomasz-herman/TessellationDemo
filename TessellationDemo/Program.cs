@@ -21,6 +21,7 @@ namespace TessellationDemo
         private ImGuiController controller;
 
         private bool showSprings;
+        private bool showControlFrame;
         private bool showCube = true;
         private float distress = 1;
         
@@ -129,6 +130,19 @@ namespace TessellationDemo
                 }
                 GL.LineWidth(1);
             }
+
+            if (showControlFrame)
+            {
+                GL.LineWidth(3);
+                defaultShader.Use();
+                defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+                jelly.ControlFrame.Mesh.Render();
+                foreach (var spring in jelly.ControlSprings)
+                {
+                    spring.Mesh.Render();
+                }
+                GL.LineWidth(1);
+            }
             
             RenderGui();
 
@@ -141,9 +155,11 @@ namespace TessellationDemo
             ImGui.SliderFloat("Distress", ref distress, 0.01f, 1);
             ImGui.SliderFloat("Mass", ref jelly.Mass, 0.01f, 100);
             ImGui.SliderFloat("Elasticity", ref jelly.Elasticity, 0.01f, 100);
+            ImGui.SliderFloat("Control Elasticity", ref jelly.ControlElasticity, 0.01f, 100);
             ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
             ImGui.Checkbox("Show Cube", ref showCube);
             ImGui.Checkbox("Show Springs", ref showSprings);
+            ImGui.Checkbox("Show Control Frame", ref showControlFrame);
             if (ImGui.Button("Stress"))
             {
                 jelly.Stress(distress);

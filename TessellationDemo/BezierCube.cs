@@ -29,9 +29,6 @@ namespace TessellationDemo
             Patches[4] = new BezierPatch(Controls.Slice(2, 0));
             Patches[5] = new BezierPatch(Controls.Slice(2, 3, true));
             
-            Controls[0, 0, 0].Get = new Vector3(-1, 1, -1);
-            Controls[3, 3, 3].Get = new Vector3(4, 2, 4);
-            
             Update();
         }
 

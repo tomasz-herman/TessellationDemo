@@ -29,6 +29,7 @@ public class Spring : IDisposable
     {
         float l = Vector3.Distance(P0.Get.Position.Get, P1.Get.Position.Get) - Length;
         float force = -elasticity * l;
+        if(Math.Abs(l) < 1e-5f) return;
         Vector3 p01 = (P0.Get.Position.Get - P1.Get.Position.Get).Normalized();
         Vector3 p10 = -p01;
         P0.Get.NextForce.Get += p01 * force;
