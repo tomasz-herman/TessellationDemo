@@ -4,13 +4,13 @@ namespace TessellationDemo
 {
     public static class Extensions
     {
-        public static Vector3[,] Slice(this Vector3[,,] array, int dim, int index, bool reverse = false)
+        public static Ptr<Vector3>[,] Slice(this Ptr<Vector3>[,,] array, int dim, int index, bool reverse = false)
         {
             switch (dim)
             {
                 case 0:
                 {
-                    Vector3[,] result = new Vector3[4, 4];
+                    Ptr<Vector3>[,] result = new Ptr<Vector3>[4, 4];
                     for (int i = 0; i < 4; i++)
                     {
                         for (int j = 0; j < 4; j++)
@@ -23,7 +23,7 @@ namespace TessellationDemo
                 }
                 case 1:
                 {
-                    Vector3[,] result = new Vector3[4, 4];
+                    Ptr<Vector3>[,] result = new Ptr<Vector3>[4, 4];
                     for (int i = 0; i < 4; i++)
                     {
                         for (int j = 0; j < 4; j++)
@@ -36,7 +36,7 @@ namespace TessellationDemo
                 }
                 case 2:
                 {
-                    Vector3[,] result = new Vector3[4, 4];
+                    Ptr<Vector3>[,] result = new Ptr<Vector3>[4, 4];
                     for (int i = 0; i < 4; i++)
                     {
                         for (int j = 0; j < 4; j++)

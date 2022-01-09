@@ -5,7 +5,7 @@ namespace TessellationDemo
 {
     public class BezierCube : IDisposable
     {
-        public Vector3[,,] Controls { get; } = new Vector3[4, 4, 4];
+        public Ptr<Vector3>[,,] Controls { get; } = new Ptr<Vector3>[4, 4, 4];
         
         public BezierPatch[] Patches { get; } = new BezierPatch[6];
 
@@ -17,13 +17,10 @@ namespace TessellationDemo
                 {
                     for (int k = 0; k < 4; k++)
                     {
-                        Controls[i, j, k] = new Vector3(i, j, k);
+                        Controls[i, j, k] = new Ptr<Vector3>(new Vector3(i, j, k));
                     }
                 }
             }
-
-            Controls[0, 0, 0] = new Vector3(-1, 1, -1);
-            Controls[3, 3, 3] = new Vector3(4, 2, 4);
 
             Patches[0] = new BezierPatch(Controls.Slice(0, 0));
             Patches[1] = new BezierPatch(Controls.Slice(0, 3, true));
@@ -31,6 +28,19 @@ namespace TessellationDemo
             Patches[3] = new BezierPatch(Controls.Slice(1, 3, true));
             Patches[4] = new BezierPatch(Controls.Slice(2, 0));
             Patches[5] = new BezierPatch(Controls.Slice(2, 3, true));
+            
+            Controls[0, 0, 0].Get = new Vector3(-1, 1, -1);
+            Controls[3, 3, 3].Get = new Vector3(4, 2, 4);
+            
+            Update();
+        }
+
+        public void Update()
+        {
+            foreach (var patch in Patches)
+            {
+                patch.Update();
+            }
         }
 
         public void Dispose()

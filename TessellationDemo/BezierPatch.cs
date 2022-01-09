@@ -7,12 +7,12 @@ namespace TessellationDemo
 {
     public class BezierPatch : IDisposable
     {
-        private Vector3[,] controls;
-        
+        public Ptr<Vector3>[,] controls { get; }
+
         public Mesh Patch { get; private set; }
         public Mesh Mesh { get; private set; }
 
-        public BezierPatch(Vector3[,] controls)
+        public BezierPatch(Ptr<Vector3>[,] controls)
         {
             this.controls = controls;
 
@@ -48,7 +48,7 @@ namespace TessellationDemo
             for (int i = 0; i < controls.GetLength(0); i++)
             for (int j = 0; j < controls.GetLength(1); j++)
             {
-                Vector3 pos = controls[i, j];
+                Vector3 pos = controls[i, j].Get;
                 positions.AddRange(new[] {pos.X, pos.Y, pos.Z});
                 
                 int idx = j + i * controls.GetLength(1);
@@ -75,6 +75,19 @@ namespace TessellationDemo
                 patchIndices.ToArray(), 
                 PrimitiveType.Patches
             );
+        }
+
+        public void Update()
+        {
+            List<float> positions = new List<float>();
+            for (int i = 0; i < controls.GetLength(0); i++)
+            for (int j = 0; j < controls.GetLength(1); j++)
+            {
+                var (x, y, z) = controls[i, j].Get;
+                positions.AddRange(new[] {x, y, z});
+            }
+            Mesh.UpdateData(positions.ToArray(), 0);
+            Patch.UpdateData(positions.ToArray(), 0);
         }
 
         public void Dispose()

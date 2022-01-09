@@ -35,6 +35,14 @@ namespace TessellationDemo
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             Vbos.Add(vbo);
         }
+
+        public void UpdateData(float[] data, int index)
+        {
+            var vbo = Vbos[index];
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, data.Length * sizeof(float), data);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+        }
         
         public void LoadIndices(int[] data) {
             var vbo = GL.GenBuffer();
