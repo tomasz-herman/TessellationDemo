@@ -7,14 +7,14 @@ namespace TessellationDemo
 {
     public class BezierPatch : IDisposable
     {
-        public Ptr<Vector3>[,] controls { get; }
+        public Ptr<Vector3>[,] Controls { get; }
 
         public Mesh Patch { get; private set; }
         public Mesh Mesh { get; private set; }
 
         public BezierPatch(Ptr<Vector3>[,] controls)
         {
-            this.controls = controls;
+            this.Controls = controls;
 
             List<int> patchIndices = new List<int>();
 
@@ -80,10 +80,10 @@ namespace TessellationDemo
         public void Update()
         {
             List<float> positions = new List<float>();
-            for (int i = 0; i < controls.GetLength(0); i++)
-            for (int j = 0; j < controls.GetLength(1); j++)
+            for (int i = 0; i < Controls.GetLength(0); i++)
+            for (int j = 0; j < Controls.GetLength(1); j++)
             {
-                var (x, y, z) = controls[i, j].Get;
+                var (x, y, z) = Controls[i, j].Get;
                 positions.AddRange(new[] {x, y, z});
             }
             Mesh.UpdateData(positions.ToArray(), 0);
