@@ -20,7 +20,8 @@ namespace TessellationDemo
         private Vector3 light;
         private ImGuiController controller;
 
-        private bool edgesOnly;
+        private bool showSprings;
+        private bool showCube = true;
         
         public static void Main(string[] args)
         {
@@ -81,6 +82,8 @@ namespace TessellationDemo
             
             controller.Update(this, (float) args.Time);
             
+            jelly.Update((float) args.Time);
+            
             if(ImGui.GetIO().WantCaptureMouse) return;
 
             KeyboardState keyboard = KeyboardState.GetSnapshot();
@@ -89,7 +92,6 @@ namespace TessellationDemo
             camera.HandleInput(keyboard, mouse, (float)args.Time);
 
             if (keyboard.IsKeyDown(Keys.Escape)) Close();
-            if (keyboard.IsKeyPressed(Keys.F)) edgesOnly = !edgesOnly;
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -101,32 +103,47 @@ namespace TessellationDemo
             GL.DepthFunc(DepthFunction.Lequal);
             
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.PolygonMode(MaterialFace.FrontAndBack, edgesOnly ? PolygonMode.Line : PolygonMode.Fill);
 
-            bezierShader.Use();
-            bezierShader.LoadFloat3("cameraPos", camera.Position);
-            bezierShader.LoadFloat3("lightPos", light);
-            bezierShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-            GL.PatchParameter(PatchParameterInt.PatchVertices, 16);
-            foreach (var patch in jelly.Cube.Patches)
+            if (showCube)
             {
-                patch.Patch.Render();
+               bezierShader.Use();
+               bezierShader.LoadFloat3("cameraPos", camera.Position);
+               bezierShader.LoadFloat3("lightPos", light);
+               bezierShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+               GL.PatchParameter(PatchParameterInt.PatchVertices, 16);
+               foreach (var patch in jelly.Cube.Patches)
+               {
+                   patch.Patch.Render();
+               } 
             }
 
-            GL.LineWidth(2);
-            defaultShader.Use();
-            defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-            foreach (var patch in jelly.Cube.Patches)
+            if (showSprings)
             {
-                patch.Mesh.Render();
+                GL.LineWidth(3);
+                defaultShader.Use();
+                defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+                foreach (var spring in jelly.Springs)
+                {
+                    spring.Mesh.Render();
+                }
+                GL.LineWidth(1);
             }
-            GL.LineWidth(1);
             
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            ImGui.ShowDemoWindow();
-            controller.Render();
+            RenderGui();
 
             Context.SwapBuffers();
+        }
+
+        private void RenderGui()
+        {
+            ImGui.Begin("Options");
+            ImGui.SliderFloat("Elasticity", ref jelly.Elasticity, 0.01f, 100);
+            ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
+            ImGui.Checkbox("Show Cube", ref showCube);
+            ImGui.Checkbox("Show Springs", ref showSprings);
+            ImGui.End();
+            
+            controller.Render();
         }
 
         protected override void OnTextInput(TextInputEventArgs e)

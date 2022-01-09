@@ -10,13 +10,16 @@ public class Jelly : IDisposable
 
     public Spring[] Springs { get; }
 
+    public float Elasticity = 1.0f;
+    public float Friction = 1.0f;
+
     public Jelly()
     {
         Cube = new BezierCube();
         Springs = CreateSprings();
     }
 
-    public void Update()
+    public void Update(float deltaTime)
     {
         Cube.Update();
         foreach (var spring in Springs)
