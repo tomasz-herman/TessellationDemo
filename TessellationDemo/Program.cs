@@ -26,6 +26,7 @@ namespace TessellationDemo
         private bool showConstraintFrame = true;
         private bool showCube = true;
         private bool showTeapot;
+        private bool showBunny;
         private float distress = 1;
         
         public static void Main(string[] args)
@@ -135,7 +136,7 @@ namespace TessellationDemo
                } 
             }
             
-            if (showTeapot)
+            if (showTeapot || showBunny)
             {
                 deformationShader.Use();
                 deformationShader.LoadFloat3("cameraPos", camera.Position);
@@ -152,7 +153,8 @@ namespace TessellationDemo
                         }
                     }
                 }
-                jelly.Teapot.Render();
+                if(showTeapot) jelly.Teapot.Render();
+                if(showBunny) jelly.Bunny.Render();
             }
 
             if (showSprings)
@@ -205,6 +207,7 @@ namespace TessellationDemo
             ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
             ImGui.Checkbox("Show Cube", ref showCube);
             ImGui.Checkbox("Show Teapot", ref showTeapot);
+            ImGui.Checkbox("Show Bunny", ref showBunny);
             ImGui.Checkbox("Show Springs", ref showSprings);
             ImGui.Checkbox("Show Control Frame", ref showControlFrame);
             ImGui.Checkbox("Show Constraint Frame", ref showConstraintFrame);
