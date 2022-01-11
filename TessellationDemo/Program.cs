@@ -199,7 +199,7 @@ namespace TessellationDemo
         private void RenderGui()
         {
             ImGui.Begin("Options");
-            ImGui.SliderFloat("Distress", ref distress, 0.01f, 1);
+            ImGui.SliderFloat("Distress", ref distress, 0.01f, 100);
             ImGui.SliderFloat("Mass", ref jelly.Mass, 0.01f, 100);
             ImGui.SliderFloat("Elasticity", ref jelly.Elasticity, 0.01f, 100);
             ImGui.SliderFloat("Control Elasticity", ref jelly.ControlElasticity, 0.01f, 100);

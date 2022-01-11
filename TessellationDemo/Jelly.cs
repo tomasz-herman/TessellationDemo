@@ -17,9 +17,9 @@ public class Jelly : IDisposable
 
     public Ptr<State>[,,] States { get; set; }
 
-    public float ControlElasticity = 1.0f;
+    public float ControlElasticity = 10.0f;
     public float CollisionElasticity = 1.0f;
-    public float Elasticity = 1.0f;
+    public float Elasticity = 10.0f;
     public float Friction = 1.0f;
     public float Mass = 1.0f;
     
@@ -141,14 +141,8 @@ public class Jelly : IDisposable
         Bunny?.Dispose();
         ControlFrame?.Dispose();
         ConstraintFrame?.Dispose();
-        foreach (var spring in Springs)
-        {
-            spring?.Dispose();
-        }
-        foreach (var spring in ControlSprings)
-        {
-            spring?.Dispose();
-        }
+        foreach (var spring in Springs) spring?.Dispose();
+        foreach (var spring in ControlSprings) spring?.Dispose();
     }
 
     private (Spring[], Spring[]) CreateSprings()
