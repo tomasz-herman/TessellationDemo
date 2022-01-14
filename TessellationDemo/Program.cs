@@ -205,6 +205,7 @@ namespace TessellationDemo
             ImGui.SliderFloat("Control Elasticity", ref jelly.ControlElasticity, 0.01f, 100);
             ImGui.SliderFloat("Collision Elasticity", ref jelly.CollisionElasticity, 0, 1);
             ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
+            ImGui.SliderFloat("Delta Time", ref jelly.DeltaTime, 0.001f, 0.1f);
             ImGui.Checkbox("Show Cube", ref showCube);
             ImGui.Checkbox("Show Teapot", ref showTeapot);
             ImGui.Checkbox("Show Bunny", ref showBunny);

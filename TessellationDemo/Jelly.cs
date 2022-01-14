@@ -22,7 +22,9 @@ public class Jelly : IDisposable
     public float Elasticity = 10.0f;
     public float Friction = 1.0f;
     public float Mass = 1.0f;
-    
+    public float DeltaTime = 0.01f;
+    public float RemainingTime = 0;
+
     public const float Constraint = 5;
 
     public Jelly()
@@ -37,23 +39,34 @@ public class Jelly : IDisposable
 
     public void Update(float deltaTime)
     {
-        foreach (var spring in Springs) spring.CalculateForces(Elasticity);
-
-        foreach (var spring in ControlSprings) spring.CalculateForces(ControlElasticity);
-
-        foreach (var state in States)
-        {
-            state.Get.CalculateFriction(Friction);
-            state.Get.Integrate(deltaTime, Mass);
-            state.Get.Advance();
-        }
-        
-        FixCollisions();
+        Step(deltaTime);
 
         Cube.Update();
         ControlFrame.Update();
         foreach (var spring in Springs) spring.Update();
         foreach (var spring in ControlSprings) spring.Update();
+    }
+
+    public void Step(float deltaTime)
+    {
+        RemainingTime += deltaTime;
+        while (RemainingTime > 0)
+        {
+            foreach (var spring in Springs) spring.CalculateForces(Elasticity);
+
+            foreach (var spring in ControlSprings) spring.CalculateForces(ControlElasticity);
+
+            foreach (var state in States)
+            {
+                state.Get.CalculateFriction(Friction);
+                state.Get.Integrate(DeltaTime, Mass);
+                state.Get.Advance();
+            }
+        
+            FixCollisions();
+            
+            RemainingTime -= DeltaTime;
+        }
     }
 
     public void FixCollisions()
