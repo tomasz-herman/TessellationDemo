@@ -28,6 +28,7 @@ namespace TessellationDemo
         private bool showTeapot;
         private bool showBunny;
         private float distress = 1;
+        private float timeSpeed = 1;
         
         public static void Main(string[] args)
         {
@@ -84,7 +85,7 @@ namespace TessellationDemo
             
             controller.Update(this, (float) args.Time);
             
-            jelly.Update((float) args.Time);
+            jelly.Update((float) args.Time * timeSpeed);
             
             if(ImGui.GetIO().WantCaptureMouse) return;
 
@@ -206,6 +207,7 @@ namespace TessellationDemo
             ImGui.SliderFloat("Collision Elasticity", ref jelly.CollisionElasticity, 0, 1);
             ImGui.SliderFloat("Friction", ref jelly.Friction, 0, 100);
             ImGui.SliderFloat("Delta Time", ref jelly.DeltaTime, 0.001f, 0.1f);
+            ImGui.SliderFloat("Time Speed", ref timeSpeed, 0f, 10);
             ImGui.Checkbox("Show Cube", ref showCube);
             ImGui.Checkbox("Show Teapot", ref showTeapot);
             ImGui.Checkbox("Show Bunny", ref showBunny);
