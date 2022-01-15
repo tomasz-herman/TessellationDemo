@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenTK.Mathematics;
 
 namespace TessellationDemo;
@@ -218,7 +219,7 @@ public class Jelly : IDisposable
                 }
             }
         }
-        
+
         controlSprings.Add(new Spring(ControlFrame.Controls[0, 0, 0], States[0, 0, 0], 0));
         controlSprings.Add(new Spring(ControlFrame.Controls[0, 0, 1], States[0, 0, 3], 0));
         controlSprings.Add(new Spring(ControlFrame.Controls[0, 1, 0], States[0, 3, 0], 0));
@@ -228,7 +229,7 @@ public class Jelly : IDisposable
         controlSprings.Add(new Spring(ControlFrame.Controls[1, 1, 0], States[3, 3, 0], 0));
         controlSprings.Add(new Spring(ControlFrame.Controls[1, 1, 1], States[3, 3, 3], 0));
 
-        return (springs.ToArray(), controlSprings.ToArray());
+        return (springs.ToHashSet().ToArray(), controlSprings.ToArray());
     }
 
     public struct State

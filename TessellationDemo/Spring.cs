@@ -49,4 +49,22 @@ public class Spring : IDisposable
         Mesh?.Dispose();
         GC.SuppressFinalize(this);
     }
+
+    protected bool Equals(Spring other)
+    {
+        return (Equals(P0, other.P0) && Equals(P1, other.P1)) || (Equals(P1, other.P0) && Equals(P0, other.P1));
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((Spring)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(P0, P1);
+    }
 }
