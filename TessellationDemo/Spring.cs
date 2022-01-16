@@ -65,6 +65,6 @@ public class Spring : IDisposable
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(P0, P1);
+        return P0.GetHashCode() ^ P1.GetHashCode();
     }
 }
